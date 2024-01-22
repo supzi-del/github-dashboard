@@ -1,0 +1,57 @@
+body {
+  font-family: 'Gill Sans', sans-serif;
+  background-color: #f0f0f0;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.header {
+  background-color: #282c34;
+  color: white;
+  padding: 20px;
+  text-align: center;
+}
+
+.section {
+  background-color: #fff;
+  margin-top: 20px;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.table-section,
+.pie-chart-section {
+  margin-top: 20px;
+}
+
+.table-section h2,
+.pie-chart-section h2 {
+  margin-bottom: 10px;
+}
+
+.table-header {
+  background-color: #ddd; /* Light grey background color */
+}
+
+
+.table-section table,
+.pie-chart-section .pie-chart {
+  width: 100%;
+}
+
+.pie-chart-section .pie-chart {
+  margin-top: 20px;
+}
+
+.pie-chart-section .legend {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
