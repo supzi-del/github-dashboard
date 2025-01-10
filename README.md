@@ -6,3 +6,7 @@ GitHub Contributions Dashboard is a web application that provides insights into 
 - **Frontend:** React, Material UI, Recharts
 - **Backend:** Flask (Python)
 - **APIs:** GitHub REST API, GitHub GraphQL API
+
+### Please see above PDF for more information.
+  
+![download](https://github.com/user-attachments/assets/8d7a0aa6-414a-4c4a-8e6b-227d5dad7d60)
