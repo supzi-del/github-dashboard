@@ -116,9 +116,12 @@ if not GITHUB_TOKEN:
 GITHUB_API_BASE_URL = 'https://api.github.com'
 GITHUB_GRAPHQL_URL = 'https://api.github.com/graphql'
 
+@app.route('/')
+def home():
+    return "<h1>GitHub Contributions Dashboard Backend</h1><p>API is running!</p>"
+
 def get_contributions(username, repo_name, token):
-    headers = {'Authorization': f'token {token}'}
-    
+    headers = {'Authorization': f'Bearer {token}'}
     query = '''
     query {
       repository(owner: "%s", name: "%s") {
@@ -135,39 +138,29 @@ def get_contributions(username, repo_name, token):
         }
       }
     }''' % (username, repo_name)
-
-    graphql_response = requests.post(GITHUB_GRAPHQL_URL, headers=headers, json={'query': query})
-    graphql_data = graphql_response.json()
-
-    print(graphql_data)  # Log the response for debugging
-
-    if 'message' in graphql_data and graphql_data['message'] == 'Bad credentials':
-        return {'error': 'Invalid GitHub token. Please check your token permissions.'}
-
-    if 'data' not in graphql_data:
-        return {'error': graphql_data.get('message', 'Failed to fetch data')}
-
-    contributions = {'created_prs': {}, 'reviewed_prs': {}, 'users': {}}
-
-    for pr in graphql_data['data']['repository']['pullRequests']['nodes']:
-        contributor = pr['author']['login']
-        if contributor not in contributions['users']:
-            contributions['users'][contributor] = {'file_changes': 0, 'line_changes': 0, 'prs': 0}
-        contributions['users'][contributor]['file_changes'] += pr['changedFiles']
-        contributions['users'][contributor]['line_changes'] += pr['additions'] + pr['deletions']
-        contributions['users'][contributor]['prs'] += 1
-        if contributor in contributions['created_prs']:
-            contributions['created_prs'][contributor] += 1
-        else:
-            contributions['created_prs'][contributor] = 1
-        for review in pr['reviews']['nodes']:
-            reviewer = review['author']['login']
-            if reviewer in contributions['reviewed_prs']:
-                contributions['reviewed_prs'][reviewer] += 1
-            else:
-                contributions['reviewed_prs'][reviewer] = 1
-
-    return contributions
+    try:
+        graphql_response = requests.post(GITHUB_GRAPHQL_URL, headers=headers, json={'query': query})
+        graphql_data = graphql_response.json()
+        print(graphql_data)
+        if graphql_response.status_code == 401:
+            return {'error': 'Unauthorized: Invalid GitHub token.'}
+        if 'data' not in graphql_data:
+            return {'error': graphql_data.get('message', 'Failed to fetch data')}
+        contributions = {'created_prs': {}, 'reviewed_prs': {}, 'users': {}}
+        for pr in graphql_data['data']['repository']['pullRequests']['nodes']:
+            contributor = pr['author']['login']
+            if contributor not in contributions['users']:
+                contributions['users'][contributor] = {'file_changes': 0, 'line_changes': 0, 'prs': 0}
+            contributions['users'][contributor]['file_changes'] += pr['changedFiles']
+            contributions['users'][contributor]['line_changes'] += pr['additions'] + pr['deletions']
+            contributions['users'][contributor]['prs'] += 1
+            contributions['created_prs'][contributor] = contributions['created_prs'].get(contributor, 0) + 1
+            for review in pr['reviews']['nodes']:
+                reviewer = review['author']['login']
+                contributions['reviewed_prs'][reviewer] = contributions['reviewed_prs'].get(reviewer, 0) + 1
+        return contributions
+    except Exception as e:
+        return {'error': str(e)}
 
 @app.route('/get_contributions/sample-collab')
 def get_sample_collab_contributions():
@@ -179,5 +172,6 @@ def get_sample_collab_contributions():
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
