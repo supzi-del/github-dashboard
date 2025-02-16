@@ -110,15 +110,15 @@ app = Flask(__name__)
 CORS(app)
 
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
+if not GITHUB_TOKEN:
+    raise ValueError("GITHUB_TOKEN is not set. Please add it to your environment variables.")
+
 GITHUB_API_BASE_URL = 'https://api.github.com'
 GITHUB_GRAPHQL_URL = 'https://api.github.com/graphql'
 
 def get_contributions(username, repo_name, token):
-    repo_url = f'{GITHUB_API_BASE_URL}/repos/{username}/{repo_name}'
     headers = {'Authorization': f'token {token}'}
-    repo_response = requests.get(repo_url, headers=headers)
-    repo_data = repo_response.json()
-
+    
     query = '''
     query {
       repository(owner: "%s", name: "%s") {
@@ -140,6 +140,9 @@ def get_contributions(username, repo_name, token):
     graphql_data = graphql_response.json()
 
     print(graphql_data)  # Log the response for debugging
+
+    if 'message' in graphql_data and graphql_data['message'] == 'Bad credentials':
+        return {'error': 'Invalid GitHub token. Please check your token permissions.'}
 
     if 'data' not in graphql_data:
         return {'error': graphql_data.get('message', 'Failed to fetch data')}
@@ -176,4 +179,5 @@ def get_sample_collab_contributions():
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
