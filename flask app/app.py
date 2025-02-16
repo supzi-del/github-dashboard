@@ -1,13 +1,16 @@
 from flask import Flask, jsonify
 from flask_cors import CORS  # Import CORS
 import requests
+import os
+
 
 app = Flask(__name__)
 
 CORS(app)
 
 
-GITHUB_TOKEN = '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'
+#GITHUB_TOKEN = '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'
+GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
 
 
 GITHUB_API_BASE_URL = 'https://api.github.com'
