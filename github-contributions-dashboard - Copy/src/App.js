@@ -18,7 +18,7 @@ const App = () => {
 
   useEffect(() => {
     // Fetch data from your Flask backend or API endpoint
-    fetch('http://127.0.0.1:5000/get_contributions/sample-collab')
+    fetch('https://github-dashboard-backend.onrender.com/get_contributions/sample-collab')
       .then(response => response.json())
       .then(data => setContributions(data));
   }, []);
